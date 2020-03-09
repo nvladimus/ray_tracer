@@ -7,7 +7,7 @@ local import:
 sys.path.append('C:/Users/nvladim/Documents/GitHub/ray_tracer/weekend_shirley')
 """
 import numpy as np
-import copy
+
 
 class Vec3:
     def __init__(self, *coord):
@@ -128,6 +128,12 @@ class HitRecord:
             assert isinstance(normal, Vec3), "Parameter (normal) must be Vec3()"
             self.normal = normal
 
+    def copy(self, source):
+        assert isinstance(source, HitRecord), "Source must be instance of HitRecord() class"
+        self.t = source.t
+        self.p = source.p
+        self.normal = source.normal
+
 
 class Surface:
     """Abstract class for any surface that can be hit by a ray (hitable)."""
@@ -188,6 +194,8 @@ class SurfaceList(Surface):
 
     def hit(self, ray: Ray, t_min: float, t_max: float, record: HitRecord) -> bool:
         assert len(self.list) > 0, "Provide a non-empty list of surfaces."
+        assert isinstance(ray, Ray), "The (ray) must be a Ray() class instance"
+        assert isinstance(record, HitRecord), "The (record) must be a HitRecord() class instance."
         temp_rec = HitRecord()
         hit_anything = False
         closest_so_far = t_max
@@ -196,5 +204,5 @@ class SurfaceList(Surface):
                 hit_anything = True
                 if temp_rec.t < closest_so_far:
                     closest_so_far = temp_rec.t
-                    (record.t, record.p, record.normal) = (temp_rec.t, temp_rec.p, temp_rec.normal)
+                    record.copy(temp_rec)
         return hit_anything
