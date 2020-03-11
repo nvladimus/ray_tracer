@@ -2,4 +2,4 @@ This is a naive translation or ray tracer in the book of [P. Shirley, Ray Tracin
 
 It starts and stops at Chapter 5, because it runs too slow.
 
-For a fast numpy implementation, see `../numpy` folder and links therein.
+For a fast numpy implementation, see `../numpy_rays` folder and links therein.

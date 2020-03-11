@@ -189,11 +189,11 @@ class Sphere(Surface):
 
 class SurfaceList(Surface):
     def __init__(self, surf_list):
-        assert len(surf_list) > 0, "Provide a non-empty list of surfaces."
+        assert len(surf_list) > 0, "Provide a non-empty surf_list of surfaces."
         self.list = surf_list
 
     def hit(self, ray: Ray, t_min: float, t_max: float, record: HitRecord) -> bool:
-        assert len(self.list) > 0, "Provide a non-empty list of surfaces."
+        assert len(self.list) > 0, "Provide a non-empty surf_list of surfaces."
         assert isinstance(ray, Ray), "The (ray) must be a Ray() class instance"
         assert isinstance(record, HitRecord), "The (record) must be a HitRecord() class instance."
         temp_rec = HitRecord()
