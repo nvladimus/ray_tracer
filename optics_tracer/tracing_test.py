@@ -57,9 +57,9 @@ def test_sphere():
     sphere100 = Sphere(Vec3(1, 0, 0), 100)
     ray1 = Ray(Vec3(0, 0, 0), Vec3(1, 0, 0))
     # test the unit sphere
-    assert sphere1.hit(ray1, t_min, t_max)[0] == 1
+    assert sphere1.hit(ray1, t_min, t_max) == 1
     # test the big sphere with center offset
-    assert sphere100.hit(ray1, t_min, t_max)[0] == 101
+    assert sphere100.hit(ray1, t_min, t_max) == 101
 
 
 def test_plane():
@@ -67,17 +67,7 @@ def test_plane():
     t_max = 1000
     plane1 = Plane(Vec3(1, 0, 0), Vec3(1, 0, 0))
     ray1 = Ray(Vec3(0, 0, 0), Vec3(1, -1, 0))
-    assert plane1.hit(ray1, t_min, t_max)[0] == np.sqrt(2)
-
-
-def test_world():
-    t_min = 0
-    t_max = 1000
-    sphere1 = Sphere()
-    world = SurfaceList([sphere1])
-    ray1 = Ray(Vec3(0, 0, 0), Vec3(1, 0, 0))
-    # test the unit sphere
-    assert world.hit(ray1, t_min, t_max)[0] == 1
+    assert plane1.hit(ray1, t_min, t_max) == np.sqrt(2)
 
 
 def test_refraction():
