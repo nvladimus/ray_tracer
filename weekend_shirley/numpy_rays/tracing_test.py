@@ -5,7 +5,7 @@ If the import modules are already in sys path, simply
 > pytest
 """
 
-from tracing import Vec3, Ray, Sphere, SurfaceList
+from tracing import *
 import numpy as np
 
 
@@ -46,8 +46,8 @@ def test_ray():
     dr = Vec3(1, 1, 1)
     r0 = Ray(ori, dr)
     assert r0.point_at_parameter(0) == ori
-    assert r0.point_at_parameter(1.0) == r0.point_at_parameter(1) == dr
-    assert r0.point_at_parameter(2.0) == r0.point_at_parameter(2) == dr * 2.0 == 2 * dr
+    assert r0.point_at_parameter(1.0) == r0.point_at_parameter(1) == dr.normalize()
+    assert r0.point_at_parameter(2.0) == r0.point_at_parameter(2) == dr.normalize() * 2
 
 
 def test_sphere():
@@ -60,6 +60,14 @@ def test_sphere():
     assert sphere1.hit(ray1, t_min, t_max)[0] == 1
     # test the big sphere with center offset
     assert sphere100.hit(ray1, t_min, t_max)[0] == 101
+
+
+def test_plane():
+    t_min = 0
+    t_max = 1000
+    plane1 = Plane(Vec3(1, 0, 0), Vec3(1, 0, 0))
+    ray1 = Ray(Vec3(0, 0, 0), Vec3(1, -1, 0))
+    assert plane1.hit(ray1, t_min, t_max)[0] == np.sqrt(2)
 
 
 def test_world():

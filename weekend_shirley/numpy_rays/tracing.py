@@ -103,14 +103,15 @@ class Vec3:
 class Ray:
     def __init__(self, origin: Vec3, direction: Vec3):
         """Ray class containing origin and direction vectors.
-        Constuctor options:
+        The direction vector gets normalized.
+        Initialization options:
         Ray(origin: Vec3, direction: Vec3)
         Example:
         r = Ray(Vec3(0, 0, 0), Vec(1, 0, 0))"""
         assert isinstance(origin, Vec3), "Origin must be Vec3 class instance"
         assert isinstance(direction, Vec3), "Direction must be Vec3 class instance"
         self.ori = origin
-        self.dir = direction
+        self.dir = direction.normalize()
 
     def point_at_parameter(self, t: float) -> Vec3:
         return self.ori + self.dir * t
@@ -120,17 +121,18 @@ class Ray:
 
 
 class Surface:
-    """Abstract class for any surface that can be hit by a ray (hitable)."""
+    """Abstract class for any surface that can be hit by a ray."""
     def __init__(self):
         pass
 
-    def hit_t(self, ray: Ray, t_min: float, t_max: float):
-        """Returns ray parameter (t) it the ray hits the sphere."""
+    def hit(self, ray: Ray, t_min: float, t_max: float) -> (np.ndarray, Vec3):
+        """Returns ray parameter (ndarray) where the ray hits the surface,
+        and vector (Vec3) containing normals at the hit points."""
         pass
 
 
 class Sphere(Surface):
-    def __init__(self, center=None, radius=None):
+    def __init__(self, center: Vec3 = None, radius: Vec3 = None):
         """Constructor options:
             Sphere() for unit sphere at the origin.
             Sphere(center: Vec3, radius: float) for any other sphere.
@@ -148,6 +150,7 @@ class Sphere(Surface):
 
     def hit(self, ray: Ray, t_min: float, t_max: float) -> (np.ndarray, Vec3):
         """Returns ray parameter (t) it the ray hits the sphere.
+        Ray direction vector can be individual or numpy.ndarray.
         """
         oc = ray.ori - self.center
         a = ray.dir.dot(ray.dir)
@@ -162,6 +165,47 @@ class Sphere(Surface):
         cond_t2 = (discriminant > 0) & (t_min < t_hits) & (t_hits < t_max)
         t_hits = np.where(cond_t2, t_hits, t_max)
         normals = (ray.point_at_parameter(t_hits) - self.center).normalize()
+        return t_hits, normals
+
+
+class Plane(Surface):
+    def __init__(self, point: Vec3, normal: Vec3):
+        """Plane defined by a point lying on it (Vec3) and a normal vector.
+        The normal vector gets normalized."""
+        assert isinstance(point, Vec3), "Point must be Vec3() class instance"
+        assert isinstance(normal, Vec3), "Normal must be Vec3() class instance"
+        self.point = point
+        self.normal = normal.normalize()
+
+    def hit(self, ray: Ray, t_min: float, t_max: float) -> (np.ndarray, Vec3):
+        """Find the ray parameter where it intersects the plane"""
+        denom = np.maximum(ray.dir.dot(self.normal), 1e-6)
+        t = (self.point - ray.ori).dot(self.normal) / denom
+        t_hits = np.where((t_min < t) & (t < t_max), t, t_max)
+        normals = (self.normal + ray.dir) - ray.dir  # a hack to broadcast normals
+        return t_hits, normals
+
+
+class Disk(Surface):
+    def __init__(self, center: Vec3, normal: Vec3, radius: float):
+        """Plane defined by a point lying on it (Vec3) and a normal vector.
+                The normal vector gets normalized."""
+        assert isinstance(center, Vec3), "Point must be Vec3() class instance"
+        assert isinstance(normal, Vec3), "Normal must be Vec3() class instance"
+        assert isinstance(radius, (float, int)), "Radius must be float or int"
+        self.center = center
+        self.normal = normal.normalize()
+        self.radius = float(radius)
+
+    def hit(self, ray: Ray, t_min: float, t_max: float) -> (np.ndarray, Vec3):
+        """Find the ray parameter where it intersects the disk"""
+        # find intersection with disk plane
+        denom = np.maximum(ray.dir.dot(self.normal), 1e-6)
+        t = (self.center - ray.ori).dot(self.normal) / denom
+        # compute distance from the center
+        disk_vectors = ray.point_at_parameter(t) - self.center
+        t_hits = np.where((t_min < t) & (t < t_max) & (disk_vectors.len() < self.radius), t, t_max)
+        normals = (self.normal + ray.dir) - ray.dir  # a hack to broadcast normals
         return t_hits, normals
 
 
